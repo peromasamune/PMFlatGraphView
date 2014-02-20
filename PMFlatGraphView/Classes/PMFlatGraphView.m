@@ -37,7 +37,7 @@
         _yMinimunStepValue = 100;
         _yValueMin = 0;
         _yLabelHeight = [PMGraphLabel getFontSize];
-        _graphMargin = 50;
+        _graphMargin = 40;
         _graphCavanWidth = self.frame.size.width - _graphMargin;
         _graphCavanHeight = self.frame.size.height - _yLabelHeight * 2;
     }

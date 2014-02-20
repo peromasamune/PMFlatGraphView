@@ -17,14 +17,15 @@ static float LabelFontSize = 11.f;
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        [self setLineBreakMode:NSLineBreakByWordWrapping];
-        [self setMinimumScaleFactor:8.0f];
-        [self setNumberOfLines:0];
+        //[self setLineBreakMode:NSLineBreakByWordWrapping];
+        [self setMinimumScaleFactor:1.f/LabelFontSize];
         [self setFont:[UIFont boldSystemFontOfSize:LabelFontSize]];
         [self setTextColor: [UIColor darkGrayColor]];
+        
+        self.numberOfLines = 0;
         self.backgroundColor = [UIColor clearColor];
-        [self setTextAlignment:NSTextAlignmentLeft];
         self.userInteractionEnabled = YES;
+        self.adjustsFontSizeToFitWidth = YES;
     }
     return self;
 }
