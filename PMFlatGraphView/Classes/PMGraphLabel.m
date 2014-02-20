@@ -10,14 +10,13 @@
 
 @implementation PMGraphLabel
 
-static float LabelFontSize = 11.f;
+static float LabelFontSize = 14.f;
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        //[self setLineBreakMode:NSLineBreakByWordWrapping];
         [self setMinimumScaleFactor:1.f/LabelFontSize];
         [self setFont:[UIFont boldSystemFontOfSize:LabelFontSize]];
         [self setTextColor: [UIColor darkGrayColor]];

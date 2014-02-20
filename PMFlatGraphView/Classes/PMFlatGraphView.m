@@ -28,11 +28,11 @@
     if (self) {
         // Initialization code
         self.backgroundColor = [UIColor whiteColor];
-        self.clipsToBounds   = YES;
-        self.graphLineArray  = [NSMutableArray new];
+        self.clipsToBounds = YES;
+        self.graphLineArray = [NSMutableArray new];
         self.userInteractionEnabled = YES;
         
-        _showLabel           = YES;
+        _showLabel = YES;
         _pathPoints = [[NSMutableArray alloc] init];
         _yMinimunStepValue = 100;
         _yValueMin = 0;
@@ -116,6 +116,11 @@
 #pragma mark -- Private Method --
 
 -(void)checkYLabelsStepValue{
+    
+    if (_yValueMax == 0) {
+        return;
+    }
+    
     int stepNum = _yValueMax / _yMinimunStepValue;
     
     if (fmod(_yValueMax,_yMinimunStepValue) > 0.f) {
@@ -197,10 +202,6 @@
             [yLabelsArray addObject:[NSString stringWithFormat:@"%2f", yValue]];
             yMax = fmaxf(yMax, yValue);
         }
-    }
-    
-    if (yMax < 5) {
-        yMax = 5.0f;
     }
     
     _yValueMax = yMax;
