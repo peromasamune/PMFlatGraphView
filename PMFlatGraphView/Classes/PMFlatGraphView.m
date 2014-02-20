@@ -38,8 +38,8 @@
         _yValueMin = 0;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 50;
-        _graphCavanWidth = self.frame.size.width - _graphMargin * 2;
-        _graphCavanHeight = self.frame.size.height - _graphMargin * 2;
+        _graphCavanWidth = self.frame.size.width - _graphMargin;
+        _graphCavanHeight = self.frame.size.height - _yLabelHeight * 2;
     }
     return self;
 }
@@ -79,7 +79,7 @@
             
             innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
             
-            point = CGPointMake(2*_graphMargin +  (i * _xLabelWidth), _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
+            point = CGPointMake(_graphMargin + (i * _xLabelWidth) + _xLabelWidth/2, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
             if (i != 0) {
                 [progressline addLineToPoint:point];
@@ -155,7 +155,7 @@
         for(int index = 0; index < xLabels.count; index++)
         {
             labelText = xLabels[index];
-            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(2*_graphMargin +  (index * _xLabelWidth) - (_xLabelWidth / 2), _graphMargin + _graphCavanHeight, _xLabelWidth, _graphMargin)];
+            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(_graphMargin +  (index * _xLabelWidth), _yLabelHeight+_graphCavanHeight, _xLabelWidth, _yLabelHeight)];
             [label setTextAlignment:NSTextAlignmentCenter];
             label.text = labelText;
             [self addSubview:label];
