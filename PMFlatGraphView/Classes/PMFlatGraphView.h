@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "PMGraphDataItem.h"
+#import "PMGraphLabel.h"
 
 @interface PMFlatGraphView : UIView
 
@@ -15,11 +16,10 @@
 @property (nonatomic) NSArray *xLabels, *yLabels;
 @property (nonatomic) NSMutableArray * pathPoints;
 
-@property (nonatomic,assign) NSInteger yLabelNum;
-@property (nonatomic,assign) CGFloat xLabelWidth, yLabelHeight;
-@property (nonatomic,assign) CGFloat yValueMax, yValueMin;
-@property (nonatomic,assign) CGFloat chartCavanHeight, chartCavanWidth;
-@property (nonatomic,assign) CGFloat chartMargin;
+@property (nonatomic,assign) CGFloat xLabelWidth, yLabelHeight;         //Label width
+@property (nonatomic,assign) double yMinimunStepValue;                  //y Axis minimun steps value
+@property (nonatomic,assign) CGFloat graphCavanHeight, graphCavanWidth;
+@property (nonatomic,assign) CGFloat graphMargin;
 @property (nonatomic,assign) BOOL showLabel;
 
 -(void)drawGraph;

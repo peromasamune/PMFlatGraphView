@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F6EE77518B5F16A001356CC /* PMGraphLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F6EE77418B5F16A001356CC /* PMGraphLabel.m */; };
 		9FEEDA7F18B496F700FC2E04 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FEEDA7E18B496F700FC2E04 /* Foundation.framework */; };
 		9FEEDA8118B496F700FC2E04 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FEEDA8018B496F700FC2E04 /* CoreGraphics.framework */; };
 		9FEEDA8318B496F700FC2E04 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FEEDA8218B496F700FC2E04 /* UIKit.framework */; };
@@ -35,6 +36,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9F6EE77318B5F16A001356CC /* PMGraphLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PMGraphLabel.h; path = Classes/PMGraphLabel.h; sourceTree = "<group>"; };
+		9F6EE77418B5F16A001356CC /* PMGraphLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PMGraphLabel.m; path = Classes/PMGraphLabel.m; sourceTree = "<group>"; };
 		9FEEDA7B18B496F700FC2E04 /* PMFlatGraphView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PMFlatGraphView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FEEDA7E18B496F700FC2E04 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9FEEDA8018B496F700FC2E04 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -163,6 +166,8 @@
 				9FEEDAB518B4973000FC2E04 /* PMFlatGraphView.m */,
 				9FEEDAD218B4AA2F00FC2E04 /* PMGraphDataItem.h */,
 				9FEEDAD318B4AA2F00FC2E04 /* PMGraphDataItem.m */,
+				9F6EE77318B5F16A001356CC /* PMGraphLabel.h */,
+				9F6EE77418B5F16A001356CC /* PMGraphLabel.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -263,6 +268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F6EE77518B5F16A001356CC /* PMGraphLabel.m in Sources */,
 				9FEEDAD418B4AA2F00FC2E04 /* PMGraphDataItem.m in Sources */,
 				9FEEDA9518B496F700FC2E04 /* ViewController.m in Sources */,
 				9FEEDAB618B4973000FC2E04 /* PMFlatGraphView.m in Sources */,
@@ -468,6 +474,7 @@
 				9FEEDAAF18B496F700FC2E04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9FEEDAB018B496F700FC2E04 /* Build configuration list for PBXNativeTarget "PMFlatGraphViewTests" */ = {
 			isa = XCConfigurationList;
@@ -476,6 +483,7 @@
 				9FEEDAB218B496F700FC2E04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

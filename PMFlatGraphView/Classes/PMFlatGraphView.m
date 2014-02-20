@@ -13,6 +13,9 @@
 @property (nonatomic) NSMutableArray *graphLineArray;
 @property (nonatomic) NSMutableArray *graphPath;
 
+@property (nonatomic,assign) NSInteger yLabelNum;
+@property (nonatomic,assign) double yValueMax, yValueMin;
+
 @end
 
 @implementation PMFlatGraphView
@@ -27,17 +30,16 @@
         self.backgroundColor = [UIColor whiteColor];
         self.clipsToBounds   = YES;
         self.graphLineArray  = [NSMutableArray new];
-        _showLabel           = YES;
-        _pathPoints = [[NSMutableArray alloc] init];
         self.userInteractionEnabled = YES;
         
-        _yLabelNum = 5.0;
-        _yLabelHeight = [[[[UILabel alloc] init] font] pointSize];
-        
-        _chartMargin = 30;
-        
-        _chartCavanWidth = self.frame.size.width - _chartMargin *2;
-        _chartCavanHeight = self.frame.size.height - _chartMargin * 2;
+        _showLabel           = YES;
+        _pathPoints = [[NSMutableArray alloc] init];
+        _yMinimunStepValue = 100;
+        _yValueMin = 0;
+        _yLabelHeight = [PMGraphLabel getFontSize];
+        _graphMargin = 50;
+        _graphCavanWidth = self.frame.size.width - _graphMargin * 2;
+        _graphCavanHeight = self.frame.size.height - _graphMargin * 2;
     }
     return self;
 }
@@ -47,10 +49,10 @@
 -(void)drawGraph{
     
     _graphPath = [[NSMutableArray alloc] init];
-    //Draw each line
+    
     for (NSUInteger lineIndex = 0; lineIndex < self.graphDataArray.count; lineIndex++) {
         PMGraphDataItem *graphItem = self.graphDataArray[lineIndex];
-        CAShapeLayer *chartLine = (CAShapeLayer *) self.graphLineArray[lineIndex];
+        CAShapeLayer *graphLine = (CAShapeLayer *) self.graphLineArray[lineIndex];
         CGFloat yValue;
         CGFloat innerGrade;
         CGPoint point;
@@ -59,13 +61,11 @@
         UIBezierPath * progressline = [UIBezierPath bezierPath];
         [_graphPath addObject:progressline];
         
-        
-        
         if(!_showLabel){
-            _chartCavanHeight = self.frame.size.height - 2*_yLabelHeight;
-            _chartCavanWidth = self.frame.size.width;
-            _chartMargin = 0.0;
-            _xLabelWidth = (_chartCavanWidth / ([_xLabels count] -1));
+            _graphCavanHeight = self.frame.size.height - 2*_yLabelHeight;
+            _graphCavanWidth = self.frame.size.width;
+            _graphMargin = 0.0;
+            _xLabelWidth = (_graphCavanWidth / ([_xLabels count] -1));
         }
         
         NSMutableArray * linePointsArray = [[NSMutableArray alloc] init];
@@ -79,7 +79,7 @@
             
             innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
             
-            point = CGPointMake(2*_chartMargin +  (i * _xLabelWidth), _chartCavanHeight - (innerGrade * _chartCavanHeight) + ( _yLabelHeight /2 ));
+            point = CGPointMake(2*_graphMargin +  (i * _xLabelWidth), _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
             if (i != 0) {
                 [progressline addLineToPoint:point];
@@ -91,23 +91,23 @@
         [_pathPoints addObject:[linePointsArray copy]];
         
         if (graphItem.lineColor) {
-            chartLine.strokeColor = graphItem.lineColor.CGColor;
+            graphLine.strokeColor = graphItem.lineColor.CGColor;
         }else{
-            chartLine.strokeColor = [UIColor greenColor].CGColor;
+            graphLine.strokeColor = [UIColor greenColor].CGColor;
         }
         
         [progressline stroke];
         
-        chartLine.path = progressline.CGPath;
+        graphLine.path = progressline.CGPath;
         
         CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
         pathAnimation.duration = 1.0;
         pathAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         pathAnimation.fromValue = [NSNumber numberWithFloat:0.0f];
         pathAnimation.toValue = [NSNumber numberWithFloat:1.0f];
-        [chartLine addAnimation:pathAnimation forKey:@"strokeEndAnimation"];
+        [graphLine addAnimation:pathAnimation forKey:@"strokeEndAnimation"];
         
-        chartLine.strokeEnd = 1.0;
+        graphLine.strokeEnd = 1.0;
         
         UIGraphicsEndImageContext();
     }
@@ -115,18 +115,28 @@
 
 #pragma mark -- Private Method --
 
+-(void)checkYLabelsStepValue{
+    int stepNum = _yValueMax / _yMinimunStepValue;
+    
+    if (fmod(_yValueMax,_yMinimunStepValue) > 0.f) {
+        stepNum++;
+        _yValueMax = _yMinimunStepValue*stepNum;
+    }
+    
+    _yLabelNum = stepNum;
+}
+
 #pragma mark -- Property Method --
 
 -(void)setYLabels:(NSArray *)yLabels{
     
     CGFloat yStep = (_yValueMax-_yValueMin) / _yLabelNum;
-	CGFloat yStepHeight = _chartCavanHeight / _yLabelNum;
-    
+	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
     
     NSInteger index = 0;
 	NSInteger num = _yLabelNum+1;
 	while (num > 0) {
-		UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(0.0, (_chartCavanHeight - index * yStepHeight), _chartMargin, _yLabelHeight)];
+		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
 		[label setTextAlignment:NSTextAlignmentRight];
 		label.text = [NSString stringWithFormat:@"%1.f",_yValueMin + (yStep * index)];
 		[self addSubview:label];
@@ -140,12 +150,12 @@
     _xLabels = xLabels;
     NSString* labelText;
     if(_showLabel){
-        _xLabelWidth = _chartCavanWidth/[xLabels count];
+        _xLabelWidth = _graphCavanWidth/[xLabels count];
         
         for(int index = 0; index < xLabels.count; index++)
         {
             labelText = xLabels[index];
-            UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(2*_chartMargin +  (index * _xLabelWidth) - (_xLabelWidth / 2), _chartMargin + _chartCavanHeight, _xLabelWidth, _chartMargin)];
+            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(2*_graphMargin +  (index * _xLabelWidth) - (_xLabelWidth / 2), _graphMargin + _graphCavanHeight, _xLabelWidth, _graphMargin)];
             [label setTextAlignment:NSTextAlignmentCenter];
             label.text = labelText;
             [self addSubview:label];
@@ -159,13 +169,11 @@
 -(void)setGraphDataArray:(NSArray *)graphDataArray{
     
     if (graphDataArray == _graphDataArray) {
-        //グラフデータが同一の場合return
         return;
     }
     
     NSMutableArray *yLabelsArray = [NSMutableArray array];
     CGFloat yMax = 0.0f;
-    CGFloat yMin = MAXFLOAT;
     CGFloat yValue;
     
     for (CALayer *layer in self.graphLineArray) {
@@ -175,32 +183,28 @@
     
     for (PMGraphDataItem *graphItem in graphDataArray) {
         
-        CAShapeLayer *chartLine = [CAShapeLayer layer];
-        chartLine.lineCap   = kCALineCapRound;
-        chartLine.lineJoin  = kCALineJoinBevel;
-        chartLine.fillColor = [[UIColor whiteColor] CGColor];
-        chartLine.lineWidth = 3.0;
-        chartLine.strokeEnd = 0.0;
-        [self.layer addSublayer:chartLine];
-        [self.graphLineArray addObject:chartLine];
+        CAShapeLayer *graphLine = [CAShapeLayer layer];
+        graphLine.lineCap   = kCALineCapRound;
+        graphLine.lineJoin  = kCALineJoinBevel;
+        graphLine.fillColor = [[UIColor whiteColor] CGColor];
+        graphLine.lineWidth = 3.0;
+        graphLine.strokeEnd = 0.0;
+        [self.layer addSublayer:graphLine];
+        [self.graphLineArray addObject:graphLine];
         
         for (NSUInteger i = 0; i < [graphItem getGraphItemCount]; i++) {
             yValue = [graphItem getGraphDataY:i];
             [yLabelsArray addObject:[NSString stringWithFormat:@"%2f", yValue]];
             yMax = fmaxf(yMax, yValue);
-            yMin = fminf(yMin, yValue);
         }
     }
     
     if (yMax < 5) {
         yMax = 5.0f;
     }
-    if (yMin < 0){
-        yMin = 0.0f;
-    }
     
-    _yValueMin = yMin;
     _yValueMax = yMax;
+    [self checkYLabelsStepValue];
     
     _graphDataArray = graphDataArray;
     
