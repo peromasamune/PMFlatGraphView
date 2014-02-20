@@ -4,7 +4,7 @@
 //
 //  Created by Taku Inoue on 2014/02/19.
 //  Copyright (c) 2014年 Peromasamune. All rights reserved.
-//
+//  test
 
 #import "ViewController.h"
 #import "PMFlatGraphView.h"
