@@ -22,6 +22,8 @@
 @property (nonatomic) UIView *yAxisView;
 @property (nonatomic, weak) id<PMFlatGraphViewDataSource> dataSource;
 
+@property (nonatomic, assign) CGFloat yAxisLabelMargin;
+
 -(void)reloadGraph;
 
 @end

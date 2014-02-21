@@ -16,9 +16,13 @@
 -(id)initWithFrame:(CGRect)frame{
     self = [super initWithFrame:frame];
     if (self) {
+        
+        _yAxisLabelMargin = 5.f;
+        
         self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         self.scrollView.backgroundColor = [UIColor clearColor];
         self.scrollView.contentSize = CGSizeMake(frame.size.width * 2, frame.size.height);
+        self.scrollView.showsHorizontalScrollIndicator = NO;
         [self addSubview:self.scrollView];
         
         self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width * 2, frame.size.height)];
@@ -53,7 +57,20 @@
     }
     UIView *labelView = [self.graphView getYAxisLabelView];
     labelView.backgroundColor = [UIColor whiteColor];
+    
+    CGFloat contentsMargin = labelView.frame.size.width + _yAxisLabelMargin;
+    
+    UIView *yAxisLabelBorderView = [[UIView alloc] initWithFrame:CGRectMake(contentsMargin, self.graphView.yLabelHeight/2, 1, self.frame.size.height - self.graphView.yLabelHeight * 2)];
+    yAxisLabelBorderView.backgroundColor = [UIColor lightGrayColor];
+    [self.yAxisView addSubview:yAxisLabelBorderView];
+    
+    self.yAxisView.frame = CGRectMake(0, 0, contentsMargin, labelView.frame.size.height);
     [self.yAxisView addSubview: labelView];
+    
+    CGRect scrollFrame = self.scrollView.frame;
+    scrollFrame.origin.x = contentsMargin;
+    scrollFrame.size.width -= contentsMargin;
+    self.scrollView.frame = scrollFrame;
 }
 
 #pragma mark Property Method
@@ -99,7 +116,7 @@
         _yValueMin = 0;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
-        _graphCavanWidth = self.frame.size.width - _graphMargin;
+        _graphCavanWidth = self.frame.size.width;
         _graphCavanHeight = self.frame.size.height - _yLabelHeight * 2;
     }
     return self;
@@ -140,7 +157,7 @@
             
             innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
             
-            point = CGPointMake(_graphMargin + (i * _xLabelWidth) + _xLabelWidth/2, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
+            point = CGPointMake((i * _xLabelWidth) + _xLabelWidth/2, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
             if (i != 0) {
                 [progressline addLineToPoint:point];
@@ -218,16 +235,15 @@
 
 -(void)setYLabels:(NSArray *)yLabels{
     
-    CGFloat yStep = (_yValueMax-_yValueMin) / _yLabelNum;
 	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
     
     NSInteger index = 0;
 	NSInteger num = _yLabelNum+1;
 	while (num > 0) {
-		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
-		[label setTextAlignment:NSTextAlignmentRight];
-		label.text = [NSString stringWithFormat:@"%1.f",_yValueMin + (yStep * index)];
-		[self addSubview:label];
+        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, 1)];
+        borderView.backgroundColor = [UIColor lightGrayColor];
+        [self addSubview:borderView];
+        
         index +=1 ;
 		num -= 1;
 	}
@@ -243,7 +259,7 @@
         for(int index = 0; index < xLabels.count; index++)
         {
             labelText = xLabels[index];
-            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(_graphMargin +  (index * _xLabelWidth), _yLabelHeight+_graphCavanHeight, _xLabelWidth, _yLabelHeight)];
+            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake((index * _xLabelWidth), _yLabelHeight+_graphCavanHeight, _xLabelWidth, _yLabelHeight)];
             [label setTextAlignment:NSTextAlignmentCenter];
             label.text = labelText;
             [self addSubview:label];
@@ -293,7 +309,7 @@
     _graphDataArray = graphDataArray;
     
     if (_showLabel) {
-        //[self setYLabels:yLabelsArray];
+        [self setYLabels:yLabelsArray];
     }
     
     [self setNeedsDisplay];
