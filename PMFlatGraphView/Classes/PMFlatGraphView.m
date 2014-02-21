@@ -9,6 +9,67 @@
 #import "PMFlatGraphView.h"
 
 @interface PMFlatGraphView()
+@end
+
+@implementation PMFlatGraphView
+
+-(id)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        self.scrollView.backgroundColor = [UIColor clearColor];
+        self.scrollView.contentSize = CGSizeMake(frame.size.width * 2, frame.size.height);
+        [self addSubview:self.scrollView];
+        
+        self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width * 2, frame.size.height)];
+        self.graphView.backgroundColor = [UIColor clearColor];
+        [self.scrollView addSubview:self.graphView];
+    }
+    return self;
+}
+
+-(void)reloadGraph{
+    if (!self.graphView || !self.dataSource) {
+        return;
+    }
+    
+    [self.graphView setXLabels:[self.dataSource PMFlatGraphViewTitleArrayForXAxis]];
+    
+    NSMutableArray *array = [NSMutableArray array];
+    for (NSInteger i=0; i < [self.dataSource PMFlatGraphViewNumberOfGraphInView]; i++) {
+        [array addObject:[self.dataSource PMFlatGraphView:self viewForItemInGraphIndex:i]];
+    }
+    
+    self.graphView.graphDataArray = array;
+    [self.graphView drawGraph];
+    
+    if (self.yAxisView) {
+        for (UIView *view in self.yAxisView.subviews){
+            [view removeFromSuperview];
+        }
+    }else{
+        self.yAxisView = [UIView new];
+        [self addSubview:self.yAxisView];
+    }
+    UIView *labelView = [self.graphView getYAxisLabelView];
+    labelView.backgroundColor = [UIColor whiteColor];
+    [self.yAxisView addSubview: labelView];
+}
+
+#pragma mark Property Method
+
+-(void)setDataSource:(id<PMFlatGraphViewDataSource>)dataSource{
+    if (dataSource) {
+        _dataSource = dataSource;
+        [self reloadGraph];
+    }
+}
+
+@end
+
+#pragma mark -- PMFlatGraphContentsView --
+
+@interface PMFlatGraphContentsView()
 
 @property (nonatomic) NSMutableArray *graphLineArray;
 @property (nonatomic) NSMutableArray *graphPath;
@@ -18,9 +79,9 @@
 
 @end
 
-@implementation PMFlatGraphView
+@implementation PMFlatGraphContentsView
 
-#pragma mark -- Initialize --
+#pragma mark Initialize
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -44,7 +105,7 @@
     return self;
 }
 
-#pragma mark -- Class Method --
+#pragma mark Class Method
 
 -(void)drawGraph{
     
@@ -113,7 +174,29 @@
     }
 }
 
-#pragma mark -- Private Method --
+-(UIView *)getYAxisLabelView{
+    
+    UIView *labelView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _graphMargin, self.frame.size.height)];
+    labelView.backgroundColor = [UIColor clearColor];
+    
+    CGFloat yStep = (_yValueMax-_yValueMin) / _yLabelNum;
+	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
+    
+    NSInteger index = 0;
+	NSInteger num = _yLabelNum+1;
+	while (num > 0) {
+		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
+		[label setTextAlignment:NSTextAlignmentRight];
+		label.text = [NSString stringWithFormat:@"%1.f",_yValueMin + (yStep * index)];
+		[labelView addSubview:label];
+        index +=1 ;
+		num -= 1;
+	}
+    
+    return labelView;
+}
+
+#pragma mark Private Method
 
 -(void)checkYLabelsStepValue{
     
@@ -131,7 +214,7 @@
     _yLabelNum = stepNum;
 }
 
-#pragma mark -- Property Method --
+#pragma mark Property Method
 
 -(void)setYLabels:(NSArray *)yLabels{
     
@@ -210,7 +293,7 @@
     _graphDataArray = graphDataArray;
     
     if (_showLabel) {
-        [self setYLabels:yLabelsArray];
+        //[self setYLabels:yLabelsArray];
     }
     
     [self setNeedsDisplay];
