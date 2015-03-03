@@ -23,7 +23,7 @@
     
     [PMGraphLabel setFontSize:14];
     
-    PMFlatGraphView *graphView = [[PMFlatGraphView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 200)];
+    PMFlatGraphView *graphView = [[PMFlatGraphView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 400)];
     graphView.dataSource = self;
     graphView.center = self.view.center;
     graphView.backgroundColor = [UIColor whiteColor];

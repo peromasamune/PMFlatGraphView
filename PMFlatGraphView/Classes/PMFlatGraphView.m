@@ -21,12 +21,14 @@
         
         self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         self.scrollView.backgroundColor = [UIColor clearColor];
-        self.scrollView.contentSize = CGSizeMake(frame.size.width * 2, frame.size.height);
+        self.scrollView.contentSize = CGSizeMake(frame.size.width - _yAxisLabelMargin *2, frame.size.height);
         self.scrollView.showsHorizontalScrollIndicator = NO;
         [self addSubview:self.scrollView];
         
-        self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width * 2, frame.size.height)];
+        self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - _yAxisLabelMargin *2, frame.size.height)];
         self.graphView.backgroundColor = [UIColor clearColor];
+        self.graphView.showLabel = NO;
+        self.graphView.startPointMargin = 5;
         [self.scrollView addSubview:self.graphView];
     }
     return self;
@@ -69,7 +71,7 @@
     
     CGRect scrollFrame = self.scrollView.frame;
     scrollFrame.origin.x = contentsMargin;
-    scrollFrame.size.width -= contentsMargin;
+    scrollFrame.size.width -= contentsMargin*2;
     self.scrollView.frame = scrollFrame;
 }
 
@@ -112,10 +114,11 @@
         
         _showLabel = YES;
         _pathPoints = [[NSMutableArray alloc] init];
-        _yMinimunStepValue = 100;
-        _yValueMin = 0;
+        _yMinimunStepValue = 0.1;
+        _yValueMin = -0.2;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
+        _startPointMargin = 5;
         _graphCavanWidth = self.frame.size.width;
         _graphCavanHeight = self.frame.size.height - _yLabelHeight * 2;
     }
@@ -141,9 +144,9 @@
         
         if(!_showLabel){
             _graphCavanHeight = self.frame.size.height - 2*_yLabelHeight;
-            _graphCavanWidth = self.frame.size.width;
+            _graphCavanWidth = self.frame.size.width - _startPointMargin*2;
             _graphMargin = 0.0;
-            _xLabelWidth = (_graphCavanWidth / ([_xLabels count] -1));
+            _xLabelWidth = (_graphCavanWidth / ([graphItem.dataArray count] -1));
         }
         
         NSMutableArray * linePointsArray = [[NSMutableArray alloc] init];
@@ -157,12 +160,23 @@
             
             innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
             
-            point = CGPointMake((i * _xLabelWidth) + _xLabelWidth/2, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
+            point = CGPointMake((i * _xLabelWidth) + _startPointMargin, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
             if (i != 0) {
                 [progressline addLineToPoint:point];
             }
-            
+
+            //UIBezierPath *roundIconPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(point.x-5, point.y-5, 10, 10) cornerRadius:5];
+            //[progressline appendPath:roundIconPath];
+
+//            UIView *iconView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
+//            iconView.backgroundColor = [UIColor whiteColor];
+//            iconView.layer.cornerRadius = 6;
+//            iconView.layer.borderColor = graphItem.lineColor.CGColor;
+//            iconView.layer.borderWidth = 2;
+//            iconView.center = point;
+//            [self addSubview:iconView];
+
             [progressline moveToPoint:point];
             [linePointsArray addObject:[NSValue valueWithCGPoint:point]];
         }
@@ -173,9 +187,7 @@
         }else{
             graphLine.strokeColor = [UIColor greenColor].CGColor;
         }
-        
-        [progressline stroke];
-        
+
         graphLine.path = progressline.CGPath;
         
         CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
@@ -184,9 +196,9 @@
         pathAnimation.fromValue = [NSNumber numberWithFloat:0.0f];
         pathAnimation.toValue = [NSNumber numberWithFloat:1.0f];
         [graphLine addAnimation:pathAnimation forKey:@"strokeEndAnimation"];
-        
+
         graphLine.strokeEnd = 1.0;
-        
+
         UIGraphicsEndImageContext();
     }
 }
@@ -234,19 +246,24 @@
 #pragma mark Property Method
 
 -(void)setYLabels:(NSArray *)yLabels{
-    
-	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
-    
-    NSInteger index = 0;
-	NSInteger num = _yLabelNum+1;
-	while (num > 0) {
-        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, 1)];
+
+    if(_showLabel){
+        CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
+        NSInteger index = 0;
+        NSInteger num = _yLabelNum+1;
+        while (num > 0) {
+            UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, 1)];
+            borderView.backgroundColor = [UIColor lightGrayColor];
+            [self addSubview:borderView];
+
+            index +=1 ;
+            num -= 1;
+        }
+    }else{
+        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, _graphCavanHeight + _yLabelHeight/2, self.frame.size.width, 1)];
         borderView.backgroundColor = [UIColor lightGrayColor];
         [self addSubview:borderView];
-        
-        index +=1 ;
-		num -= 1;
-	}
+    }
 }
 
 -(void)setXLabels:(NSArray *)xLabels{
@@ -308,9 +325,7 @@
     
     _graphDataArray = graphDataArray;
     
-    if (_showLabel) {
-        [self setYLabels:yLabelsArray];
-    }
+    [self setYLabels:yLabelsArray];
     
     [self setNeedsDisplay];
 }

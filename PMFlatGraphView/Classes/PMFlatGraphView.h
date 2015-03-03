@@ -49,6 +49,7 @@
 @property (nonatomic,assign) double yMinimunStepValue;                  //y Axis minimun steps value
 @property (nonatomic,assign) CGFloat graphCavanHeight, graphCavanWidth;
 @property (nonatomic,assign) CGFloat graphMargin;
+@property (nonatomic,assign) CGFloat startPointMargin;
 @property (nonatomic,assign) BOOL showLabel;
 
 -(void)drawGraph;
