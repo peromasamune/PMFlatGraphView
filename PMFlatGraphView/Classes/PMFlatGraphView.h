@@ -10,7 +10,36 @@
 #import "PMGraphDataItem.h"
 #import "PMGraphLabel.h"
 
+#pragma mark -- PMFlatGraphView --
+
+@protocol PMFlatGraphViewDataSource;
+
+@class PMFlatGraphContentsView;
 @interface PMFlatGraphView : UIView
+
+@property (nonatomic) UIScrollView *scrollView;
+@property (nonatomic) PMFlatGraphContentsView *graphView;
+@property (nonatomic) UIView *yAxisView;
+@property (nonatomic, weak) id<PMFlatGraphViewDataSource> dataSource;
+
+@property (nonatomic, assign) CGFloat yAxisLabelMargin;
+
+-(void)reloadGraph;
+
+@end
+
+#pragma mark -- PMFlatGraphViewDelegate --
+
+@protocol PMFlatGraphViewDataSource <NSObject>
+-(NSInteger)PMFlatGraphViewNumberOfGraphInView;
+-(PMGraphDataItem *)PMFlatGraphView:(PMFlatGraphView *)graphView viewForItemInGraphIndex:(NSInteger)index;
+@optional
+-(NSArray *)PMFlatGraphViewTitleArrayForXAxis;
+@end
+
+#pragma mark -- PMFlatGraphContentsView --
+
+@interface PMFlatGraphContentsView : UIView
 
 @property (nonatomic) NSArray *graphDataArray;
 @property (nonatomic) NSArray *xLabels, *yLabels;
@@ -23,5 +52,6 @@
 @property (nonatomic,assign) BOOL showLabel;
 
 -(void)drawGraph;
+-(UIView *)getYAxisLabelView;
 
 @end
