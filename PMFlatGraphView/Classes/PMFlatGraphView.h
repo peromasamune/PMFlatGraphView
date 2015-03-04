@@ -51,6 +51,7 @@
 @property (nonatomic,assign) CGFloat graphMargin;
 @property (nonatomic,assign) CGFloat startPointMargin;
 @property (nonatomic,assign) BOOL showLabel;
+@property (nonatomic,assign) BOOL isValueReverse;
 
 -(void)drawGraph;
 -(UIView *)getYAxisLabelView;

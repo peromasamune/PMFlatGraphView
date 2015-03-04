@@ -29,6 +29,7 @@
         self.graphView.backgroundColor = [UIColor clearColor];
         self.graphView.showLabel = NO;
         self.graphView.startPointMargin = 10;
+        self.graphView.isValueReverse = YES;
         [self.scrollView addSubview:self.graphView];
     }
     return self;
@@ -111,11 +112,12 @@
         self.clipsToBounds = YES;
         self.graphLineArray = [NSMutableArray new];
         self.userInteractionEnabled = YES;
-        
+
         _showLabel = YES;
+        _isValueReverse = NO;
         _pathPoints = [[NSMutableArray alloc] init];
-        _yMinimunStepValue = 0.1;
-        _yValueMin = -0.2;
+        _yMinimunStepValue = 0.3;
+        _yValueMin = 0.0;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
         _startPointMargin = 5;
@@ -158,7 +160,7 @@
             
             yValue = [graphItem getGraphDataY:i];
             
-            innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
+            innerGrade = (yValue*((_isValueReverse) ? (-1) : 1) - _yValueMin) / ( _yValueMax - _yValueMin);
             
             point = CGPointMake((i * _xLabelWidth) + _startPointMargin, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
