@@ -17,7 +17,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         
-        _yAxisLabelMargin = 5.f;
+        _yAxisLabelMargin = 0;
         
         self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         self.scrollView.backgroundColor = [UIColor clearColor];
@@ -28,7 +28,7 @@
         self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - _yAxisLabelMargin *2, frame.size.height)];
         self.graphView.backgroundColor = [UIColor clearColor];
         self.graphView.showLabel = NO;
-        self.graphView.startPointMargin = 5;
+        self.graphView.startPointMargin = 10;
         [self.scrollView addSubview:self.graphView];
     }
     return self;
@@ -169,13 +169,15 @@
             //UIBezierPath *roundIconPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(point.x-5, point.y-5, 10, 10) cornerRadius:5];
             //[progressline appendPath:roundIconPath];
 
-//            UIView *iconView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
-//            iconView.backgroundColor = [UIColor whiteColor];
-//            iconView.layer.cornerRadius = 6;
-//            iconView.layer.borderColor = graphItem.lineColor.CGColor;
-//            iconView.layer.borderWidth = 2;
-//            iconView.center = point;
-//            [self addSubview:iconView];
+            if (i==0 || i==[graphItem getGraphItemCount]-1) {
+                UIView *iconView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
+                iconView.backgroundColor = [UIColor whiteColor];
+                iconView.layer.cornerRadius = 6;
+                iconView.layer.borderColor = graphItem.lineColor.CGColor;
+                iconView.layer.borderWidth = 3;
+                iconView.center = point;
+                [self addSubview:iconView];
+            }
 
             [progressline moveToPoint:point];
             [linePointsArray addObject:[NSValue valueWithCGPoint:point]];
@@ -190,12 +192,12 @@
 
         graphLine.path = progressline.CGPath;
         
-        CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-        pathAnimation.duration = 1.0;
-        pathAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        pathAnimation.fromValue = [NSNumber numberWithFloat:0.0f];
-        pathAnimation.toValue = [NSNumber numberWithFloat:1.0f];
-        [graphLine addAnimation:pathAnimation forKey:@"strokeEndAnimation"];
+//        CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+//        pathAnimation.duration = 1.0;
+//        pathAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+//        pathAnimation.fromValue = [NSNumber numberWithFloat:0.0f];
+//        pathAnimation.toValue = [NSNumber numberWithFloat:1.0f];
+//        [graphLine addAnimation:pathAnimation forKey:@"strokeEndAnimation"];
 
         graphLine.strokeEnd = 1.0;
 
