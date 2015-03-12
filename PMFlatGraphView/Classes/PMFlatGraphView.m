@@ -117,7 +117,7 @@
         _isValueReverse = NO;
         _pathPoints = [[NSMutableArray alloc] init];
         _yMinimunStepValue = 0.3;
-        _yValueMin = 0.0;
+        _yValueMin = -0.1;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
         _startPointMargin = 5;
