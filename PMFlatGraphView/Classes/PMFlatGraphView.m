@@ -16,31 +16,27 @@
 -(id)initWithFrame:(CGRect)frame{
     self = [super initWithFrame:frame];
     if (self) {
-        
-        _yAxisLabelMargin = 0;
-        
         self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         self.scrollView.backgroundColor = [UIColor clearColor];
-        self.scrollView.contentSize = CGSizeMake(frame.size.width - _yAxisLabelMargin *2, frame.size.height);
+        self.scrollView.contentSize = CGSizeMake(frame.size.width, frame.size.height);
         self.scrollView.showsHorizontalScrollIndicator = NO;
         [self addSubview:self.scrollView];
         
-        self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width - _yAxisLabelMargin *2, frame.size.height)];
-        self.graphView.backgroundColor = [UIColor clearColor];
-        self.graphView.showLabel = NO;
-        self.graphView.startPointMargin = 10;
-        self.graphView.isValueReverse = YES;
+        self.graphView = [[PMFlatGraphContentsView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         [self.scrollView addSubview:self.graphView];
     }
     return self;
+}
+
+-(void)layoutSubviews{
+    [super layoutSubviews];
+    [self reloadGraph];
 }
 
 -(void)reloadGraph{
     if (!self.graphView || !self.dataSource) {
         return;
     }
-    
-    [self.graphView setXLabels:[self.dataSource PMFlatGraphViewTitleArrayForXAxis]];
     
     NSMutableArray *array = [NSMutableArray array];
     for (NSInteger i=0; i < [self.dataSource PMFlatGraphViewNumberOfGraphInView]; i++) {
@@ -61,7 +57,7 @@
     UIView *labelView = [self.graphView getYAxisLabelView];
     labelView.backgroundColor = [UIColor whiteColor];
     
-    CGFloat contentsMargin = labelView.frame.size.width + _yAxisLabelMargin;
+    CGFloat contentsMargin = labelView.frame.size.width;
     
     UIView *yAxisLabelBorderView = [[UIView alloc] initWithFrame:CGRectMake(contentsMargin, self.graphView.yLabelHeight/2, 1, self.frame.size.height - self.graphView.yLabelHeight * 2)];
     yAxisLabelBorderView.backgroundColor = [UIColor lightGrayColor];
@@ -72,7 +68,7 @@
     
     CGRect scrollFrame = self.scrollView.frame;
     scrollFrame.origin.x = contentsMargin;
-    scrollFrame.size.width -= contentsMargin*2;
+    scrollFrame.size.width -= contentsMargin;
     self.scrollView.frame = scrollFrame;
 }
 
@@ -81,7 +77,6 @@
 -(void)setDataSource:(id<PMFlatGraphViewDataSource>)dataSource{
     if (dataSource) {
         _dataSource = dataSource;
-        [self reloadGraph];
     }
 }
 
@@ -96,6 +91,7 @@
 
 @property (nonatomic,assign) NSInteger yLabelNum;
 @property (nonatomic,assign) double yValueMax, yValueMin;
+@property (nonatomic,assign) NSInteger xLabelMaxCount;
 
 @end
 
@@ -110,14 +106,15 @@
         // Initialization code
         self.backgroundColor = [UIColor whiteColor];
         self.clipsToBounds = YES;
-        self.graphLineArray = [NSMutableArray new];
         self.userInteractionEnabled = YES;
 
         _showLabel = YES;
         _isValueReverse = NO;
+        _isCombineXLabel = NO;
+        _graphLineArray = [NSMutableArray new];
         _pathPoints = [[NSMutableArray alloc] init];
-        _yMinimunStepValue = 0.3;
-        _yValueMin = -0.1;
+        _yMinimunStepValue = 0.1;
+        _xStepValue = 1.0;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
         _startPointMargin = 5;
@@ -129,8 +126,18 @@
 
 #pragma mark Class Method
 
+-(void)prepareDrawGraph{
+    if(!_showLabel){
+        _graphCavanHeight = self.frame.size.height - 2*_yLabelHeight;
+        _graphCavanWidth = self.frame.size.width - _startPointMargin*2;
+        _graphMargin = 0.0;
+    }else{
+        _graphCavanWidth = self.frame.size.width - _startPointMargin*2 - _graphMargin;
+    }
+}
+
 -(void)drawGraph{
-    
+
     _graphPath = [[NSMutableArray alloc] init];
     
     for (NSUInteger lineIndex = 0; lineIndex < self.graphDataArray.count; lineIndex++) {
@@ -144,23 +151,22 @@
         UIBezierPath * progressline = [UIBezierPath bezierPath];
         [_graphPath addObject:progressline];
         
-        if(!_showLabel){
-            _graphCavanHeight = self.frame.size.height - 2*_yLabelHeight;
-            _graphCavanWidth = self.frame.size.width - _startPointMargin*2;
-            _graphMargin = 0.0;
-            _xLabelWidth = (_graphCavanWidth / ([graphItem.dataArray count] -1));
-        }
-        
         NSMutableArray * linePointsArray = [[NSMutableArray alloc] init];
         [progressline setLineWidth:3.0];
         [progressline setLineCapStyle:kCGLineCapRound];
         [progressline setLineJoinStyle:kCGLineJoinRound];
+
+        if (_isCombineXLabel) {
+            _xLabelWidth = (_graphCavanWidth / ([graphItem.dataArray count] -1));
+        }else{
+            _xLabelWidth = (_graphCavanWidth / (_xLabelMaxCount -1));
+        }
         
         for (NSUInteger i = 0; i < [graphItem getGraphItemCount]; i++) {
             
-            yValue = [graphItem getGraphDataY:i];
+            yValue = [graphItem getGraphDataY:i] * ((_isValueReverse) ? (-1) : 1);
             
-            innerGrade = (yValue*((_isValueReverse) ? (-1) : 1) - _yValueMin) / ( _yValueMax - _yValueMin);
+            innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
             
             point = CGPointMake((i * _xLabelWidth) + _startPointMargin, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
             
@@ -211,8 +217,7 @@
     
     UIView *labelView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _graphMargin, self.frame.size.height)];
     labelView.backgroundColor = [UIColor clearColor];
-    
-    CGFloat yStep = (_yValueMax-_yValueMin) / _yLabelNum;
+
 	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
     
     NSInteger index = 0;
@@ -220,7 +225,11 @@
 	while (num > 0) {
 		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
 		[label setTextAlignment:NSTextAlignmentRight];
-		label.text = [NSString stringWithFormat:@"%1.f",_yValueMin + (yStep * index)];
+        if (_yMinimunStepValue < 1.0) {
+            label.text = [NSString stringWithFormat:@"%.1f",_yValueMin + (_yMinimunStepValue * index)];
+        }else{
+            label.text = [NSString stringWithFormat:@"%1f",_yValueMin + (_yMinimunStepValue * index)];
+        }
 		[labelView addSubview:label];
         index +=1 ;
 		num -= 1;
@@ -237,11 +246,17 @@
         return;
     }
     
-    int stepNum = _yValueMax / _yMinimunStepValue;
+    int stepNum = (_yValueMax - _yValueMin) / _yMinimunStepValue;
     
     if (fmod(_yValueMax,_yMinimunStepValue) > 0.f) {
         stepNum++;
-        _yValueMax = _yMinimunStepValue*stepNum;
+        int maxStep = _yValueMax / _yMinimunStepValue;
+        _yValueMax = (maxStep * _yMinimunStepValue) + _yMinimunStepValue;
+    }
+    if (fmod(_yValueMin, _yMinimunStepValue) < 0.f) {
+        stepNum++;
+        int minStep = _yValueMin / _yMinimunStepValue;
+        _yValueMin = (minStep * _yMinimunStepValue) - _yMinimunStepValue;
     }
     
     _yLabelNum = stepNum;
@@ -270,25 +285,24 @@
     }
 }
 
--(void)setXLabels:(NSArray *)xLabels{
-    
-    _xLabels = xLabels;
-    NSString* labelText;
-    if(_showLabel){
-        _xLabelWidth = _graphCavanWidth/[xLabels count];
-        
-        for(int index = 0; index < xLabels.count; index++)
-        {
-            labelText = xLabels[index];
-            PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake((index * _xLabelWidth), _yLabelHeight+_graphCavanHeight, _xLabelWidth, _yLabelHeight)];
-            [label setTextAlignment:NSTextAlignmentCenter];
-            label.text = labelText;
+-(void)setXLabelsWithLabelCount:(NSInteger)count{
+
+    if (_isCombineXLabel) {
+        return;
+    }
+
+    NSInteger labelCount = count / _xStepValue;
+
+    if (_showLabel) {
+        CGFloat labelWidth = _graphCavanWidth/labelCount;
+
+        for (int i = 0; i < labelCount; i++) {
+            PMGraphLabel *label = [[PMGraphLabel alloc] initWithFrame:CGRectMake((i * labelWidth) + _startPointMargin, _yLabelHeight + _graphCavanHeight, labelWidth, _yLabelHeight)];
+            label.text = [NSString stringWithFormat:@"%ld",(long)i];
             [self addSubview:label];
         }
-        
-    }else{
-        _xLabelWidth = (self.frame.size.width)/[xLabels count];
     }
+
 }
 
 -(void)setGraphDataArray:(NSArray *)graphDataArray{
@@ -299,7 +313,9 @@
     
     NSMutableArray *yLabelsArray = [NSMutableArray array];
     CGFloat yMax = 0.0f;
+    CGFloat yMin = 0.0f;
     CGFloat yValue;
+    NSInteger labelCount = 0;
     
     for (CALayer *layer in self.graphLineArray) {
         [layer removeFromSuperlayer];
@@ -318,18 +334,26 @@
         [self.graphLineArray addObject:graphLine];
         
         for (NSUInteger i = 0; i < [graphItem getGraphItemCount]; i++) {
-            yValue = [graphItem getGraphDataY:i];
-            [yLabelsArray addObject:[NSString stringWithFormat:@"%2f", yValue]];
+            yValue = [graphItem getGraphDataY:i] * ((_isValueReverse) ? (-1) : 1);
+            [yLabelsArray addObject:[NSString stringWithFormat:@"%f", yValue]];
             yMax = fmaxf(yMax, yValue);
+            yMin = fminf(yMin, yValue);
         }
+
+        labelCount = MAX(labelCount, [graphItem.dataArray count]);
     }
     
     _yValueMax = yMax;
+    _yValueMin = yMin;
+    _xLabelMaxCount = labelCount;
+
+    [self prepareDrawGraph];
     [self checkYLabelsStepValue];
     
     _graphDataArray = graphDataArray;
     
     [self setYLabels:yLabelsArray];
+    [self setXLabelsWithLabelCount:labelCount];
     
     [self setNeedsDisplay];
 }
