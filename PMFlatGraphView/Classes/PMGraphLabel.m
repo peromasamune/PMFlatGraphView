@@ -10,7 +10,7 @@
 
 @implementation PMGraphLabel
 
-static float LabelFontSize = 14.f;
+static float LabelFontSize = 17.f;
 
 - (id)initWithFrame:(CGRect)frame
 {

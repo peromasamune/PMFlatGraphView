@@ -221,7 +221,8 @@
 	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
     
     NSInteger index = 0;
-	NSInteger num = _yLabelNum+1;
+    NSInteger num = _yLabelNum+1;
+
 	while (num > 0) {
 		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
 		[label setTextAlignment:NSTextAlignmentRight];
@@ -297,7 +298,10 @@
         CGFloat labelWidth = _graphCavanWidth/labelCount;
 
         for (int i = 0; i < labelCount; i++) {
-            PMGraphLabel *label = [[PMGraphLabel alloc] initWithFrame:CGRectMake((i * labelWidth) + _startPointMargin, _yLabelHeight + _graphCavanHeight, labelWidth, _yLabelHeight)];
+            PMGraphLabel *label = [[PMGraphLabel alloc] initWithFrame:CGRectInset(CGRectMake((i * labelWidth) + _startPointMargin, _yLabelHeight + _graphCavanHeight, labelWidth, _yLabelHeight), 1, 0)];
+            if (labelCount > 10) {
+                label.font = [UIFont boldSystemFontOfSize:11];
+            }
             label.text = [NSString stringWithFormat:@"%ld",(long)i];
             [self addSubview:label];
         }
