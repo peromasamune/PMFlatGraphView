@@ -160,18 +160,21 @@
         [progressline setLineJoinStyle:kCGLineJoinRound];
 
         if (_isCombineXLabel) {
-            _xLabelWidth = (_graphCavanWidth / ([graphItem.dataArray count] -1));
+            NSInteger count = ([graphItem.dataArray count] - 1 > 0) ? ([graphItem.dataArray count] -1) : 1;
+            _xLabelWidth = (_graphCavanWidth / count);
         }else{
-            _xLabelWidth = (_graphCavanWidth / (_xLabelMaxCount -1));
+            NSInteger count = (_xLabelMaxCount - 1 > 0) ? (_xLabelMaxCount -1) : 1;
+            _xLabelWidth = (_graphCavanWidth / count);
         }
         
         for (NSUInteger i = 0; i < [graphItem getGraphItemCount]; i++) {
             
             yValue = [graphItem getGraphDataY:i] * ((_isValueReverse) ? (-1) : 1);
+
+            double valueDiff = (_yValueMax - _yValueMin > 0) ? ( _yValueMax - _yValueMin) : 1;
+            innerGrade = (yValue - _yValueMin) / valueDiff;
             
-            innerGrade = (yValue - _yValueMin) / ( _yValueMax - _yValueMin);
-            
-            point = CGPointMake((i * _xLabelWidth) + _startPointMargin, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight /2 ));
+            point = CGPointMake((i * _xLabelWidth) + _startPointMargin, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight / 2));
             
             if (i != 0) {
                 [progressline addLineToPoint:point];
@@ -225,7 +228,7 @@
     UIView *labelView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _graphMargin, self.frame.size.height)];
     labelView.backgroundColor = [UIColor clearColor];
 
-	CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
+    CGFloat yStepHeight = (_yLabelNum > 0) ? _graphCavanHeight / _yLabelNum : 1;
     
     NSInteger index = 0;
     NSInteger num = _yLabelNum+1;
@@ -253,6 +256,10 @@
     if (_yValueMax == 0) {
         return;
     }
+
+    if (_yMinimunStepValue == 0) {
+        _yMinimunStepValue = 1;
+    }
     
     int stepNum = (_yValueMax - _yValueMin) / _yMinimunStepValue;
     
@@ -268,11 +275,19 @@
     }
     
     _yLabelNum = stepNum;
+
+    if (_yLabelNum == 0) {
+        _yLabelNum = 1;
+    }
 }
 
 #pragma mark Property Method
 
 -(void)setYLabels:(NSArray *)yLabels{
+
+    if (_yLabelNum == 0) {
+        return;
+    }
 
     if(_drawYaxisBorder){
         CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
@@ -304,7 +319,7 @@
         return;
     }
 
-    NSInteger labelCount = count / _xStepValue;
+    NSInteger labelCount = (count / _xStepValue > 0) ? count / _xStepValue : 1;
     NSInteger labelIndex = 0;
 
     if (_showLabel) {
@@ -368,9 +383,9 @@
         labelCount = MAX(labelCount, [graphItem.dataArray count]);
     }
     
-    _yValueMax = yMax;
+    _yValueMax = (yMax != 0.0) ? yMax : _yMinimunStepValue;
     _yValueMin = yMin;
-    _xLabelMaxCount = labelCount;
+    _xLabelMaxCount = (labelCount) ? labelCount : _xStepValue;
 
     [self prepareDrawGraph];
     [self checkYLabelsStepValue];
@@ -378,7 +393,7 @@
     _graphDataArray = graphDataArray;
     
     [self setYLabels:yLabelsArray];
-    [self setXLabelsWithLabelCount:labelCount];
+    [self setXLabelsWithLabelCount:_xLabelMaxCount];
     
     [self setNeedsDisplay];
 }
