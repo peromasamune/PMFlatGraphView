@@ -59,7 +59,7 @@
     
     CGFloat contentsMargin = labelView.frame.size.width;
     
-    UIView *yAxisLabelBorderView = [[UIView alloc] initWithFrame:CGRectMake(contentsMargin, self.graphView.yLabelHeight/2, 1, self.frame.size.height - self.graphView.yLabelHeight * 2)];
+    UIView *yAxisLabelBorderView = [[UIView alloc] initWithFrame:CGRectMake(contentsMargin, 0, 1, self.frame.size.height - self.graphView.yLabelHeight * 2 + self.graphView.yLabelHeight/2)];
     yAxisLabelBorderView.backgroundColor = [UIColor lightGrayColor];
     [self.yAxisView addSubview:yAxisLabelBorderView];
     
@@ -115,9 +115,12 @@
         _pathPoints = [[NSMutableArray alloc] init];
         _yMinimunStepValue = 0.1;
         _xStepValue = 1.0;
+        _xStepInterval = 1.0;
         _yLabelHeight = [PMGraphLabel getFontSize];
         _graphMargin = 40;
         _startPointMargin = 5;
+        _drawYaxisBorder = YES;
+        _drawXaxisBorder = NO;
         _graphCavanWidth = self.frame.size.width;
         _graphCavanHeight = self.frame.size.height - _yLabelHeight * 2;
     }
@@ -214,6 +217,10 @@
 }
 
 -(UIView *)getYAxisLabelView{
+
+    if (!_showLabel) {
+        return nil;
+    }
     
     UIView *labelView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _graphMargin, self.frame.size.height)];
     labelView.backgroundColor = [UIColor clearColor];
@@ -267,17 +274,22 @@
 
 -(void)setYLabels:(NSArray *)yLabels{
 
-    if(_showLabel){
+    if(_drawYaxisBorder){
         CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
         NSInteger index = 0;
         NSInteger num = _yLabelNum+1;
+        CGFloat currentVal = _yValueMin;
         while (num > 0) {
-            UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, 1)];
+            CGFloat borderWidth = (currentVal == 0) ? 3 : 1;
+
+            UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, borderWidth)];
             borderView.backgroundColor = [UIColor lightGrayColor];
             [self addSubview:borderView];
+            [self sendSubviewToBack:borderView];
 
             index +=1 ;
             num -= 1;
+            currentVal += _yMinimunStepValue;
         }
     }else{
         UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, _graphCavanHeight + _yLabelHeight/2, self.frame.size.width, 1)];
@@ -293,17 +305,26 @@
     }
 
     NSInteger labelCount = count / _xStepValue;
+    NSInteger labelIndex = 0;
 
     if (_showLabel) {
-        CGFloat labelWidth = _graphCavanWidth/labelCount;
+        CGFloat labelWidth = (_graphCavanWidth/labelCount)*_xStepInterval;
 
         for (int i = 0; i < labelCount; i++) {
-            PMGraphLabel *label = [[PMGraphLabel alloc] initWithFrame:CGRectInset(CGRectMake((i * labelWidth) + _startPointMargin, _yLabelHeight + _graphCavanHeight, labelWidth, _yLabelHeight), 1, 0)];
-            if (labelCount > 10) {
-                label.font = [UIFont boldSystemFontOfSize:11];
+            if (i == 0 || i % _xStepInterval == 0) {
+                PMGraphLabel *label = [[PMGraphLabel alloc] initWithFrame:CGRectInset(CGRectMake((labelIndex * labelWidth) + _startPointMargin, _yLabelHeight + _graphCavanHeight, labelWidth, _yLabelHeight), 1, 0)];
+                label.text = [NSString stringWithFormat:@"%ld",(long)i];
+                [self addSubview:label];
+
+                if (_drawXaxisBorder && i != 0) {
+                    UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake((labelIndex * labelWidth) + _startPointMargin + 5, 0, 1, _graphCavanHeight + _yLabelHeight/2)];
+                    borderView.backgroundColor = [UIColor lightGrayColor];
+                    [self addSubview:borderView];
+                    [self sendSubviewToBack:borderView];
+                }
+
+                labelIndex++;
             }
-            label.text = [NSString stringWithFormat:@"%ld",(long)i];
-            [self addSubview:label];
         }
     }
 
