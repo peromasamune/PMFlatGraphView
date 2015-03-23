@@ -39,7 +39,8 @@
     }
     
     NSMutableArray *array = [NSMutableArray array];
-    for (NSInteger i=0; i < [self.dataSource PMFlatGraphViewNumberOfGraphInView]; i++) {
+    NSInteger graphCount = [self.dataSource PMFlatGraphViewNumberOfGraphInView];
+    for (NSInteger i=0; i < graphCount; i++) {
         [array addObject:[self.dataSource PMFlatGraphView:self viewForItemInGraphIndex:i]];
     }
     
