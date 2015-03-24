@@ -232,9 +232,9 @@
     CGFloat yStepHeight = (_yLabelNum > 0) ? _graphCavanHeight / _yLabelNum : 1;
     
     NSInteger index = 0;
-    NSInteger num = _yLabelNum+1;
+    NSInteger num = _yLabelNum;
 
-	while (num > 0) {
+	while (num >= 0) {
 		PMGraphLabel * label = [[PMGraphLabel alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight), _graphMargin, _yLabelHeight)];
 		[label setTextAlignment:NSTextAlignmentRight];
         if (_yMinimunStepValue < 1.0) {
@@ -261,20 +261,19 @@
     if (_yMinimunStepValue == 0) {
         _yMinimunStepValue = 1;
     }
-    
-    int stepNum = (_yValueMax - _yValueMin) / _yMinimunStepValue;
-    
-    if (fmod(_yValueMax,_yMinimunStepValue) > 0.f) {
-        stepNum++;
-        int maxStep = _yValueMax / _yMinimunStepValue;
-        _yValueMax = (maxStep * _yMinimunStepValue) + _yMinimunStepValue;
-    }
-    if (fmod(_yValueMin, _yMinimunStepValue) < 0.f) {
-        stepNum++;
-        int minStep = _yValueMin / _yMinimunStepValue;
+
+    int maxStep = _yValueMax / _yMinimunStepValue;
+    _yValueMax = (maxStep * _yMinimunStepValue) + _yMinimunStepValue;
+
+    int minStep = _yValueMin / _yMinimunStepValue;
+    if (_yValueMin < 0) {
         _yValueMin = (minStep * _yMinimunStepValue) - _yMinimunStepValue;
+    }else{
+        _yValueMin = (minStep * _yMinimunStepValue);
     }
-    
+
+    int stepNum = (_yValueMax - _yValueMin) / _yMinimunStepValue;
+
     _yLabelNum = stepNum;
 
     if (_yLabelNum == 0) {
@@ -291,11 +290,11 @@
     }
 
     if(_drawYaxisBorder){
-        CGFloat yStepHeight = _graphCavanHeight / _yLabelNum;
+        CGFloat yStepHeight = (_yLabelNum > 0) ? _graphCavanHeight / _yLabelNum : 0;
         NSInteger index = 0;
-        NSInteger num = _yLabelNum+1;
+        NSInteger num = _yLabelNum;
         CGFloat currentVal = _yValueMin;
-        while (num > 0) {
+        while (num >= 0) {
             CGFloat borderWidth = (currentVal == 0) ? 3 : 1;
 
             UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, (_graphCavanHeight - index * yStepHeight) + _yLabelHeight/2, self.frame.size.width, borderWidth)];
