@@ -150,6 +150,11 @@
         CGFloat yValue;
         CGFloat innerGrade;
         CGPoint point;
+
+        if (graphItem.lineStyle == PMGraphLineStyleDashed) {
+            graphLine.lineDashPattern = @[@2 ,@3];
+            graphLine.lineDashPhase = 1;
+        }
         
         UIGraphicsBeginImageContext(self.frame.size);
         UIBezierPath * progressline = [UIBezierPath bezierPath];
@@ -365,7 +370,9 @@
     for (PMGraphDataItem *graphItem in graphDataArray) {
         
         CAShapeLayer *graphLine = [CAShapeLayer layer];
-        graphLine.lineCap   = kCALineCapRound;
+        if (graphItem.lineStyle == PMGraphLineStyleDefault) {
+            graphLine.lineCap   = kCALineCapRound;
+        }
         graphLine.lineJoin  = kCALineJoinBevel;
         graphLine.fillColor = [[UIColor whiteColor] CGColor];
         graphLine.lineWidth = 3.0;

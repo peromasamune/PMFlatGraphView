@@ -8,10 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum {
+    PMGraphLineStyleDefault = 0,
+    PMGraphLineStyleDashed  = 1,
+}PMGraphLineStyle;
+
 @interface PMGraphDataItem : NSObject
 
 @property (nonatomic) NSArray *dataArray; //グラフのデータを格納
 @property (nonatomic) UIColor *lineColor; //線の色
+@property (nonatomic) PMGraphLineStyle lineStyle; //線のスタイル
 
 -(NSInteger)getGraphItemCount;
 -(CGFloat)getGraphDataY:(NSInteger)index;
