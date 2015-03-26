@@ -37,14 +37,20 @@
     if (!self.graphView || !self.dataSource) {
         return;
     }
-    
+
+    //Custom border
+    if ([self.dataSource respondsToSelector:@selector(PMFlatGraphViewYAxisCustomBorder)]) {
+        self.graphView.customYAxisBorder = [self.dataSource PMFlatGraphViewYAxisCustomBorder];
+    }
+
+    //DataSource
     NSMutableArray *array = [NSMutableArray array];
     NSInteger graphCount = [self.dataSource PMFlatGraphViewNumberOfGraphInView];
     for (NSInteger i=0; i < graphCount; i++) {
         [array addObject:[self.dataSource PMFlatGraphView:self viewForItemInGraphIndex:i]];
     }
-    
     self.graphView.graphDataArray = array;
+
     [self.graphView drawGraph];
     
     if (self.yAxisView) {
@@ -286,7 +292,23 @@
     }
 }
 
-#pragma mark Property Method
+-(void)drawCustomYAxisBorder{
+
+    if (!_customYAxisBorder || [_customYAxisBorder count] == 0) {
+        return;
+    }
+
+    double valueDiff = (_yValueMax - _yValueMin > 0) ? ( _yValueMax - _yValueMin) : 1;
+
+    for (PMGraphDataItem *item in _customYAxisBorder){
+        double innerGrade = (item.atPoint - _yValueMin) / valueDiff;
+
+        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight / 2), self.frame.size.width, 2)];
+        borderView.backgroundColor = (item.lineColor) ? item.lineColor : [UIColor blackColor];
+        [self addSubview:borderView];
+        [self sendSubviewToBack:borderView];
+    }
+}
 
 -(void)setYLabels:(NSArray *)yLabels{
 
@@ -350,6 +372,8 @@
 
 }
 
+#pragma mark Property Method
+
 -(void)setGraphDataArray:(NSArray *)graphDataArray{
     
     if (graphDataArray == _graphDataArray) {
@@ -398,7 +422,9 @@
     [self checkYLabelsStepValue];
     
     _graphDataArray = graphDataArray;
-    
+
+    //Draw border line
+    [self drawCustomYAxisBorder];
     [self setYLabels:yLabelsArray];
     [self setXLabelsWithLabelCount:_xLabelMaxCount];
     

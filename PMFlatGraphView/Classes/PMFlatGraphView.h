@@ -31,6 +31,8 @@
 @protocol PMFlatGraphViewDataSource <NSObject>
 -(NSInteger)PMFlatGraphViewNumberOfGraphInView;
 -(PMGraphDataItem *)PMFlatGraphView:(PMFlatGraphView *)graphView viewForItemInGraphIndex:(NSInteger)index;
+@optional
+-(NSArray *)PMFlatGraphViewYAxisCustomBorder; //Array of PMGraphDataiItem
 @end
 
 #pragma mark -- PMFlatGraphContentsView --
@@ -39,6 +41,7 @@
 
 @property (nonatomic) NSArray *graphDataArray;
 @property (nonatomic) NSArray *xLabels, *yLabels;
+@property (nonatomic) NSArray *customYAxisBorder;
 @property (nonatomic) NSMutableArray * pathPoints;
 
 @property (nonatomic,assign) CGFloat xLabelWidth, yLabelHeight;         //Label width

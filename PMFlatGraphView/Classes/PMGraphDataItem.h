@@ -18,6 +18,7 @@ typedef enum {
 @property (nonatomic) NSArray *dataArray; //グラフのデータを格納
 @property (nonatomic) UIColor *lineColor; //線の色
 @property (nonatomic) PMGraphLineStyle lineStyle; //線のスタイル
+@property (nonatomic) CGFloat atPoint; //線の位置 (for Custom border)
 
 -(NSInteger)getGraphItemCount;
 -(CGFloat)getGraphDataY:(NSInteger)index;
