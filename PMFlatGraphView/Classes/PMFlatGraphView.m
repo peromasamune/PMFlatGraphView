@@ -301,9 +301,13 @@
     double valueDiff = (_yValueMax - _yValueMin > 0) ? ( _yValueMax - _yValueMin) : 1;
 
     for (PMGraphDataItem *item in _customYAxisBorder){
-        double innerGrade = (item.atPoint - _yValueMin) / valueDiff;
+        double innerGrade = (item.endPoint - _yValueMin) / valueDiff;
+        double height = (((item.endPoint - item.startPoint) /valueDiff) * _graphCavanHeight);
+        if (height == 0) {
+            height = 2;
+        }
 
-        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight / 2), self.frame.size.width, 2)];
+        UIView *borderView = [[UIView alloc] initWithFrame:CGRectMake(0.0, _graphCavanHeight - (innerGrade * _graphCavanHeight) + ( _yLabelHeight / 2), self.frame.size.width, height)];
         borderView.backgroundColor = (item.lineColor) ? item.lineColor : [UIColor blackColor];
         [self addSubview:borderView];
         [self sendSubviewToBack:borderView];
